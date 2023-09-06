@@ -5,3 +5,4 @@ This is an Arduino library that includes basic types and containers seen in the 
 ### Containers
 - Vector
 - List
+- Deque
