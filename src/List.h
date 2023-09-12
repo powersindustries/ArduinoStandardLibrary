@@ -247,7 +247,7 @@ public:
 	// ---------------------------------------------
 	T* begin()
 	{
-		return !m_HeadNode : nullptr ? m_HeadNode->m_Data;
+		return !m_HeadNode ? nullptr : m_HeadNode->m_Data;
 	}
 
 
