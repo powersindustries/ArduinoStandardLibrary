@@ -2,33 +2,25 @@
 #define List_h
 
 
+#include <cstdint>
 template <typename T>
-class ListNode
+class LNode
 {
 public:
 
 
 	// ---------------------------------------------
 	// ---------------------------------------------
-	ListNode()
-		: m_NextNode(nullptr)
+	LNode()
+		: m_NextNode(nullptr), m_PreviousNode(nullptr)
 	{
 	}
 
 
 	// ---------------------------------------------
 	// ---------------------------------------------
-	ListNode(T inData)
-		: m_NextNode(nullptr)
-	{
-		m_Data = inData;
-	}
-
-
-	// ---------------------------------------------
-	// ---------------------------------------------
-	ListNode(T inData, ListNode* inNextNode)
-		: m_NextNode(inNextNode)
+	LNode(T inData)
+		: m_NextNode(nullptr), m_PreviousNode(nullptr)
 	{
 		m_Data = inData;
 	}
@@ -36,17 +28,17 @@ public:
 
 	// ---------------------------------------------
 	// ---------------------------------------------
-	~ListNode()
+	~LNode()
 	{
 	}
 
 
 public:
 
-	ListNode* m_NextNode;
+	LNode* m_NextNode;
+	LNode* m_PreviousNode;
 
 	T m_Data;
-
 };
 
 
@@ -75,84 +67,56 @@ public:
 
 	// ---------------------------------------------
 	// ---------------------------------------------
-	T* front()
-	{
-		return !m_HeadNode ? nullptr : &m_HeadNode->m_Data;
-	}
-
-
-	// ---------------------------------------------
-	// ---------------------------------------------
-	T* back()
-	{
-		if (!m_HeadNode)
-		{
-			return nullptr;
-		}
-
-		ListNode<T>* tempListNode = m_HeadNode;
-		while (tempListNode)
-		{
-			if (!tempListNode->m_NextNode)
-			{
-				break;
-			}
-
-			tempListNode = tempListNode->m_NextNode;
-		}
-
-		return &tempListNode->m_Data;
-	}
-
-
-	// ---------------------------------------------
-	// ---------------------------------------------
 	void push_back(const T inData)
 	{
-		if (!m_HeadNode)
-		{
-			m_HeadNode = new ListNode<T>(inData);
-			m_iSize++;
-			return;
-		}
+        LNode<T>* newNode = new LNode<T>(inData);
 
-		ListNode<T>* tempListNode = m_HeadNode;
-		while (tempListNode)
-		{
-			if (!tempListNode->m_NextNode)
-			{
-				break;
-			}
+        if (m_iSize == 0)
+        {
+            m_HeadNode = newNode;
+            m_iSize++;
+            return;
+        }
 
-			tempListNode = tempListNode->m_NextNode;
-		}
+        LNode<T>* tempNode = m_HeadNode;
+        while (tempNode != nullptr)
+        {
+            if (tempNode->m_NextNode == nullptr)
+            {
+                tempNode->m_NextNode = newNode;
+                newNode->m_PreviousNode = tempNode; 
+                newNode->m_NextNode = nullptr;
 
-		ListNode<T>* newListNode = new ListNode<T>(inData);
-		tempListNode->m_NextNode = newListNode;
+                m_iSize++;
+                return;
+            }
 
-		m_iSize++;
-	}
+            tempNode = tempNode->m_NextNode;
+        }
+    }
 
 
 	// ---------------------------------------------
 	// ---------------------------------------------
 	void push_front(const T inData)
 	{
-		if (!m_HeadNode)
-		{
-			m_HeadNode = new ListNode<T>(inData);
-			m_iSize++;
-			return;
-		}
+        LNode<T>* newNode = new LNode<T>(inData);
 
-		ListNode<T>* newListNode = new ListNode<T>(inData);
-		ListNode<T>* oldHeadNode = m_HeadNode;
-		newListNode->m_NextNode = oldHeadNode;
+        if (m_HeadNode == nullptr)
+        {
+            m_HeadNode = newNode;
+        }
+        else
+        {
+            newNode->m_NextNode = m_HeadNode;
+            newNode->m_PreviousNode = nullptr;
 
-		m_HeadNode = newListNode;
+            m_HeadNode->m_PreviousNode = newNode;
+            m_HeadNode = newNode;
+        }
 
-		m_iSize++;
-	}
+        m_iSize++;
+    }
 
 
 	// ---------------------------------------------
@@ -169,7 +133,7 @@ public:
 			return;
 		}
 
-		ListNode<T>* oldHeadNode = m_HeadNode;
+		LNode<T>* oldHeadNode = m_HeadNode;
 		m_HeadNode = m_HeadNode->m_NextNode;
 		delete oldHeadNode;
 
@@ -191,7 +155,7 @@ public:
 			return;
 		}
 
-		ListNode<T>* tempListNode = m_HeadNode;
+		LNode<T>* tempListNode = m_HeadNode;
 		while (tempListNode)
 		{
 			if (!tempListNode->m_NextNode->m_NextNode)
@@ -203,7 +167,6 @@ public:
 		}
 
 		delete tempListNode->m_NextNode->m_NextNode;
-
 		tempListNode->m_NextNode = nullptr;
 
 		m_iSize--;
@@ -214,25 +177,44 @@ public:
 	// ---------------------------------------------
 	void insert(const int index, T inData)
 	{
-		if (!m_HeadNode || index >= m_iSize)
-		{
-			return;
-		}
+        if (index > m_iSize)
+        {
+            return;
+        }
 
-		ListNode<T>* tempListNode = m_HeadNode;
-		for (int x = 0; x < index - 1; ++x)
-		{
-			tempListNode = tempListNode->m_NextNode;
-		}
+        if (index == 0)
+        {
+            push_front(inData);
+        }
+        else if (index == m_iSize)
+        {
+            push_back(inData);
+        }
+        else
+        {
+            LNode<T>* newNode = new LNode<T>(inData);
 
-		ListNode<T>* newNode = new ListNode<T>(inData);
-		ListNode<T>* newNextNode = tempListNode->m_NextNode;
+            LNode<T>* tempNode = m_HeadNode;
+            unsigned int tempIndex = 0;
+            while (tempNode != nullptr)
+            {
+                if (tempIndex == index)
+                {
+                    newNode->m_NextNode = tempNode;
+                    newNode->m_PreviousNode = tempNode->m_PreviousNode;
 
-		tempListNode->m_NextNode = newNode;
-		newNode->m_NextNode = newNextNode;
+                    tempNode->m_PreviousNode->m_NextNode = newNode;
+                    tempNode->m_PreviousNode = newNode;
 
-		m_iSize++;
-	}
+                    m_iSize++;
+                    return;
+                }
+
+                tempNode = tempNode->m_NextNode;
+                tempIndex++;
+            }
+        }
+    }
 
 
 	// ---------------------------------------------
@@ -253,6 +235,14 @@ public:
 
 	// ---------------------------------------------
 	// ---------------------------------------------
+	T* front()
+	{
+		return !m_HeadNode ? nullptr : &m_HeadNode->m_Data;
+	}
+
+
+	// ---------------------------------------------
+	// ---------------------------------------------
 	T* end()
 	{
 		if (!m_HeadNode)
@@ -260,7 +250,31 @@ public:
 			return nullptr;
 		}
 
-		ListNode<T>* tempListNode = m_HeadNode;
+		LNode<T>* tempListNode = m_HeadNode;
+		while (tempListNode)
+		{
+			if (!tempListNode->m_NextNode)
+			{
+				break;
+			}
+
+			tempListNode = tempListNode->m_NextNode;
+		}
+
+		return &tempListNode->m_Data;
+	}
+
+
+	// ---------------------------------------------
+	// ---------------------------------------------
+	T* back()
+	{
+		if (!m_HeadNode)
+		{
+			return nullptr;
+		}
+
+		LNode<T>* tempListNode = m_HeadNode;
 		while (tempListNode)
 		{
 			if (!tempListNode->m_NextNode)
@@ -277,9 +291,9 @@ public:
 
 private:
 
-	ListNode<T>* m_HeadNode;
+	LNode<T>* m_HeadNode;
 
-	int m_iSize;
+	uint8_t m_iSize;
 
 };
 
