@@ -8,3 +8,4 @@ This is an Arduino library that includes basic types and containers seen in the 
 - ForwardList
 - Deque
 - Stack
+- Queue
